@@ -1,0 +1,8 @@
+discordToken: 'Discord Token'
+guildID: 'Discord Guild ID'
+clientID: 'Application ID'
+groupMeChannelID: 'Channel for GroupMe'
+port: 3000
+groupMeID: 'GroupMe bot id'
+groupMeAccessToken: 'GroupMe access token'
+groupMeWebhook: 'Webhook for the GroupMe channel'

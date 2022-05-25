@@ -1,0 +1,12 @@
+[Unit]
+Description=bot
+After=network.target
+
+[Service]
+Type=Simple
+User=node
+ExecStart=/bin/bash /app/start.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
