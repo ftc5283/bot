@@ -6,16 +6,15 @@ curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
 apt-get install -y nodejs
 npm install --global yarn
 
-adduser node
+adduser -disabled-password --gecos "" node
 usermod -aG sudo node
-usermod -aG gpio node
 
 git clone https://github.com/ftc5283/bot.git app
 
 cd /app
 yarn install
 
-ln -s /app/bot.service /lib/systemd/system/bot.service
+ln -s /app/bot.service /etc/systemd/system
 cp /app/config.example.yml /app/config.yml
 
 chown -R node:node /app
