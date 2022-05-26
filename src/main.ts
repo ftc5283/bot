@@ -10,6 +10,7 @@ import fs from 'fs';
 import Logger from './logger';
 import Config from './config';
 import GroupMeMessage from './groupMeMessage';
+import GroupMeAttachment from './groupMeAttachment';
 
 export default class Main {
     public static main(args: string[]): void {
@@ -29,7 +30,7 @@ export default class Main {
 
         (async () => {
             try {
-                Logger.log(3, 'Starting the Application');
+                Logger.log(3, 'Starting the Discord Bot');
 
                 if (commands.length > 0) {
                     Logger.log(3, 'Registering Slash Commands');
@@ -57,14 +58,7 @@ export default class Main {
                     // no attachments yet.
 
                     let discordMessage = {
-                        content: null,
-                        embeds: [
-                            {
-                                description: json.text,
-                                color: 43748,
-                                timestamp: new Date(json.created_at).toISOString()
-                            },
-                        ],
+                        content: json.text,
                         username: json.name,
                         avatar_url: json.avatar_url,
                     };
@@ -76,6 +70,23 @@ export default class Main {
                         },
                         body: JSON.stringify(discordMessage),
                     });
+
+                    for(let i = 0; i < json.attachments.length; i++) {
+                        let attachment = json.attachments[i];
+                        let body = {
+                            content: attachment.url,
+                            username: json.name,
+                            avatar_url: json.avatar_url,
+                        }
+                        
+                        fetch(config.groupMeWebhook, {
+                            method: 'post',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(body),
+                        });
+                    }
 
 
                     // This doesn't work in Insomnia but I don't care enough to fix it.
@@ -93,7 +104,7 @@ export default class Main {
                     if (message.channelId === config.groupMeChannelID) {
                         if (!message.author.bot) {
                             (async () => {
-                                let attatchements: any = await (async () => {
+                                let attachments: any = await (async () => {
                                     const attachments: any[] = [];
                                     for (let attachment of message.attachments) {
                                         let attachmentContent: any = await fetch(attachment[1].url);
@@ -120,7 +131,6 @@ export default class Main {
                                 let bodyData: string = JSON.stringify({
                                     bot_id: config.groupMeID,
                                     text: `${message.author.tag} ${message.cleanContent}`,
-                                    attachments: attatchements,
                                 });
                                 await fetch('https://api.groupme.com/v3/bots/post', {
                                     body: bodyData,
@@ -128,15 +138,30 @@ export default class Main {
                                     headers: {
                                         'Content-Type': 'application/json',
                                     }
-                                })
+                                });
+                                for(let attachment of attachments) {
+                                    await fetch('https://api.groupme.com/v3/bots/post', {
+                                        body: JSON.stringify({
+                                            bot_id: config.groupMeID,
+                                            text: message.author.tag,
+                                            attachments: [attachment],
+                                        }),
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                        }
+                                    });
+                                }
                             })();
                         }
                     }
                 });
 
                 client.login(config.discordToken);
+
+                Logger.log(3,'Starting the Web Service');
                 app.listen(config.port, () => {
-                    Logger.log(4,'Started web service');
+                    Logger.log(3,'Started the Web Service');
                 });
             } catch (e: any) {
                 Logger.log(1, e.toString());
@@ -145,6 +170,7 @@ export default class Main {
     }
 
     private static onReady(client: Client): void {
+        Logger.log(3, 'Started the Discord Bot')
         Logger.log(3, `Bot is logged in as ${client.user!.tag}`);
     }
 }
