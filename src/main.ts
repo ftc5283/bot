@@ -1,3 +1,5 @@
+declare function require(name:string): any;
+
 import { Routes } from 'discord-api-types/v10';
 import { REST } from '@discordjs/rest';
 import { Client, Intents, MessageEmbed, MessagePayload } from 'discord.js';
