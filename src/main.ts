@@ -1,6 +1,8 @@
-import {Routes} from 'discord-api-types/v10';
-import {REST} from '@discordjs/rest';
-import {Client, Intents} from 'discord.js';
+import { Routes } from 'discord-api-types/v10';
+import { REST } from '@discordjs/rest';
+import { Client, Intents, MessageEmbed, MessagePayload } from 'discord.js';
+
+import getUrls from 'get-urls';
 
 import express from 'express';
 
@@ -27,7 +29,7 @@ export default class Main {
 
 		const commands: Object[] = [];
 
-		const rest: REST = new REST({version: '10'});
+		const rest: REST = new REST({ version: '10' });
 
 		(async () => {
 			try {
@@ -168,7 +170,51 @@ export default class Main {
 								}
 							})();
 						}
+					} else if (!message.author.bot) {
+						let urls: Array<string> = Array.from(getUrls(message.content));
+						if (urls.length > 0) {
+							let threatEntries: any[] = [];
+							urls.forEach((url) => {
+								threatEntries.push({
+									url: url
+								});
+							});
+							fetch(`https://safebrowsing.googleapis.com/v4/threatMatches:find?key=${config.gapiKey}`, {
+								method: 'POST',
+								headers: {
+									'Content-Type': 'application/json',
+								},
+								body: JSON.stringify({
+									client: {
+										clientID: 'discordbot',
+										clientVersion: '4.0'
+									},
+									threatInfo: {
+										threatTypes: ["MALWARE", "SOCIAL_ENGINEERING", "POTENTIALLY_HARMFUL_APPLICATION", "UNWANTED_SOFTWARE"],
+										platformTypes: ["ANY_PLATFORM", "WINDOWS", "OSX", "LINUX", "CHROME", "ANDROID", "IOS", "ALL_PLATFORMS"],
+										threatEntryTypes: ["URL","IP_RANGE"],
+										threatEntries: threatEntries,
+									}
+								}),
+							}).then((res) => {
+								if (res.ok) {
+									res.json().then((json: any) => {
+										if (json.matches) {
+											let embed: MessageEmbed = new MessageEmbed()
+												.setColor('#D93025') // Google SafeBrowsing Color
+												.setTitle('Dangerous Site Ahead')
+												.setDescription(`Attackers on the ${urls.length > 1 ? 'sites' : 'site'} above might trick you into doing something dangerous like installing software or revealing your personal information (for example, passwords, phone numbers, or credit cards)`)
+												.setThumbnail('https://i.imgur.com/VCsB0yg.png');
+											message.channel.send({ embeds: [embed] });
+										}
+									});
+								} else {
+									Logger.log(2, `SafeBrowsing API Error: ${res.statusText}`);
+								}
+							});
+						}
 					}
+
 				});
 
 				client.login(config.discordToken);

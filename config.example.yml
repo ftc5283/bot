@@ -6,3 +6,4 @@ port: 3000
 groupMeID: 'GroupMe bot id'
 groupMeAccessToken: 'GroupMe access token'
 groupMeWebhook: 'Webhook for the GroupMe channel'
+gapiKey: 'Google API Key'

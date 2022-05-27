@@ -7,4 +7,5 @@ export default class Config {
 	'groupMeID': string;
 	'groupMeAccessToken': string;
 	'groupMeWebhook': string;
+	'gapiKey': string;
 }
