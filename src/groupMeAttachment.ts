@@ -1,4 +1,4 @@
 export default class GroupMeAttachment {
-     "type": string;
-     "url": string;
+	'type': string;
+	'url': string;
 }
