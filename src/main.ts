@@ -148,7 +148,7 @@ export default class Main {
 
 								const bodyData: string = JSON.stringify({
 									bot_id: config.groupMeID,
-									text: `${message.author.tag} ${message.cleanContent}`,
+									text: `${client.guilds.get(config.guildID).member(message.author).displayName} ${message.cleanContent}`,
 								});
 								await fetch('https://api.groupme.com/v3/bots/post', {
 									body: bodyData,
