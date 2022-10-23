@@ -1,7 +1,7 @@
 cd /
 apt-get update
 apt-get upgrade -y
-apt-get install curl nano sudo git build-essential
+apt-get install curl nano sudo git build-essential -y
 curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
 apt-get install -y nodejs
 npm install --global yarn
